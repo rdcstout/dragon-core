@@ -1,57 +1,44 @@
 name: host-tests
-
-on:
-  push:
-  pull_request:
-
 permissions:
   contents: read
-
 concurrency:
   group: host-tests-${{ github.ref }}
   cancel-in-progress: true
-
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out source
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-
-      - name: Run Bambu parser tests
-        run: tests/run_bambu_host_test.sh
-
-      - name: Run Prusa freshness tests
-        run: tests/run_prusa_host_test.sh
-
-      - name: Test Wi-Fi credential boundary validation
-        run: tests/run_wifi_validate_host_test.sh
-
-      - name: Test console snapshot streaming
-        run: tests/run_console_stream_host_test.sh
-
-      - name: Run generic PID tests
-        run: tests/run_pid_host_test.sh
-
-      - name: Check family SPA syntax and capability contract
-        run: node tests/check_ui.mjs
-
-      - name: Reject whitespace errors
-        run: git diff --check
-
+    - name: Check out source
+      uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+    - name: Run Bambu parser tests
+      run: tests/run_bambu_host_test.sh
+    - name: Run Prusa freshness tests
+      run: tests/run_prusa_host_test.sh
+    - name: Test Wi-Fi credential boundary validation
+      run: tests/run_wifi_validate_host_test.sh
+    - name: Test console snapshot streaming
+      run: tests/run_console_stream_host_test.sh
+    - name: Run generic PID tests
+      run: tests/run_pid_host_test.sh
+    - name: Check family SPA syntax and capability contract
+      run: node tests/check_ui.mjs
+    - name: Reject whitespace errors
+      run: git diff --check
+    timeout-minutes: 30
   esp-idf-build:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out source
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-
-      # Compile every shared component together at the minimum supported IDF
-      # version. This catches component metadata, public-header, and link-time
-      # integration failures that the host-only parser test cannot exercise.
-      - name: Build all components (ESP-IDF v5.3, ESP32-C3)
-        uses: espressif/esp-idf-ci-action@9d38657f3d789ca759b2b37aaf5ceffbc42c4f0d # v1
-        with:
-          esp_idf_version: v5.3
-          target: esp32c3
-          path: .
-          command: tools/idf-build.sh tests/idf-build esp32c3 build
+    - name: Check out source
+      uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+    - name: Build all components (ESP-IDF v5.3, ESP32-C3)
+      uses: espressif/esp-idf-ci-action@9d38657f3d789ca759b2b37aaf5ceffbc42c4f0d
+      with:
+        esp_idf_version: v5.3
+        target: esp32c3
+        path: .
+        command: tools/idf-build.sh tests/idf-build esp32c3 build
+    timeout-minutes: 30
+'on':
+  push: null
+  pull_request: null
+  workflow_dispatch: {}
